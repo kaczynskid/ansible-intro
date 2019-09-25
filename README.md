@@ -4,27 +4,27 @@
     configuration management, application deployment, intra-service orchestration,
     and many other IT needs.
     ```
-
+---
  - install Ansible
     ```shell script
     pip install ansible
     ```
-
+---
  - configure Ansible
     ```shell script
     cat ansible.cfg
     ```
-
+---
  - ad-hoc commands
    ```shell script
    ansible 127.0.0.1 -a "pwd"
    ```
-
+---
  - create local inventory
     ```text
     localhost	ansible_connection=local
     ```
- 
+---
  - first playbook
     ```yaml
     # site.yml
@@ -34,18 +34,18 @@
             repo: "git@github.com:kaczynskid/ansible-test.git"
             dest: "{{system_base_dir}}/ansible-test"
     ```
-
+---
  - define groups in inventory group_vars
     ```yaml
     # group_vars/all/vars.yml
     system_base_dir: "/tmp/app"
     ```
-
+---
  - run the playbook on inventory
     ```shell script
     ansible-playbook -i machine.inv site.yml
     ```
-
+---
  - docker machine
     ```shell script
     docker-machine ls
@@ -53,13 +53,13 @@
     eval $(docker-machine env default)
     ssh -i $DOCKER_CERT_PATH/id_rsa docker@`docker-machine ip $DOCKER_MACHINE_NAME`
     ```
-
+---
  - configure machine inventory
     ```yaml
     # machine.inv
     machine
     ```
-
+---
  - and machine host_vars
     ```yaml
     # host_vars/machine/vars.yml
@@ -68,6 +68,7 @@
     ansible_ssh_private_key_file: "{{ lookup('env', 'DOCKER_CERT_PATH' ) }}/id_rsa"
     ansible_python_interpreter: "/usr/local/bin/python"
     ```
+---
 
  - install python
     ```yaml
@@ -83,7 +84,7 @@
           raw: "tce-load -w -i python"
           when: tce_load_python | default(False)
     ```
-
+---
  - roles
     ```yaml
     # roles/git-host/defaults
@@ -99,7 +100,7 @@
       roles:
         - git-host
     ```
-
+---
  - install pip & git depending on target package manager 
     ```yaml
     - include: dependencies_apt.yml
@@ -111,7 +112,7 @@
     - include: dependencies_unknown.yml
       when: ansible_pkg_mgr == "unknown"
     ```
-
+---
  - update pip
     ```yaml
     - name: locate pip executable
@@ -127,7 +128,7 @@
       become: yes
       become_method: sudo
     ```
-
+---
  - install extra python modules
     ```yaml
     - name: locate updated pip executable
@@ -150,7 +151,7 @@
         - boto
         - boto3
     ```
-
+---
  - create local and remote directories
     ```yaml
     - name: make sure local directory exists
@@ -170,7 +171,7 @@
       become: yes
       become_method: sudo
     ```
-
+---
  - generate new ssh key
     ```shell script
     ssh-keygen -f .id_rsa -C auto@acme.com
@@ -179,19 +180,19 @@
     system_ssh_key: "-----BEGIN RSA PRIVATE KEY-----..."
     system_ssh_key_pub: "ssh-rsa AAAA..."
     ```
-
+---
  - Ansible Vault password file
     ```shell script
     cat .vault_pass.txt 
     siicret
     ```
-
+---
  - encrypt ssh keys
     ```shell script
     ansible-vault encrypt roles/git-host/defaults/main.yml --vault-password-file ./.vault_pass.txt
     ansible-vault decrypt roles/git-host/defaults/main.yml --vault-password-file ./.vault_pass.txt
     ```
-
+---
  - install ssh keys
     ```yaml
     - name: check if ssh key exists
@@ -213,7 +214,7 @@
         mode: 0600
       when: not docker_host_ssh_status.stat.exists
     ``` 
-
+---
  - configure git
     ```yaml
     - name: check if git config exists
