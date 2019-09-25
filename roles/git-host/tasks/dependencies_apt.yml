@@ -1,0 +1,11 @@
+---
+
+- name: install packages if missing
+  apt:
+    name: "{{ item }}"
+    state: latest
+  become: yes
+  become_method: sudo
+  with_items:
+    - python-pip
+    - git-all

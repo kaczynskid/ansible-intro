@@ -1,0 +1,20 @@
+---
+
+- name: check if pip installed
+  stat:
+    path: /usr/local/bin/pip
+  register: pip
+
+- name: download pip
+  get_url:
+    url: https://bootstrap.pypa.io/get-pip.py
+    dest: /tmp/get-pip.py
+  become: yes
+  become_method: sudo
+  when: not (pip.stat.isreg is defined and pip.stat.isreg)
+
+- name: install pip
+  command: "python /tmp/get-pip.py"
+  become: yes
+  become_method: sudo
+  when: not (pip.stat.isreg is defined and pip.stat.isreg)

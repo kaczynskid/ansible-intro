@@ -1,0 +1,14 @@
+---
+
+- name: get remote user name
+  shell: "whoami"
+  changed_when: False
+  register: system_user_name_result
+
+- name: get remote user uid
+  shell: "id -u {{ system_user_name }}"
+  changed_when: False
+  register: system_user_id_result
+
+- debug:
+    msg: User {{ system_user_name }} has uuid {{ system_user_id }}

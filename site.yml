@@ -1,0 +1,7 @@
+---
+
+- hosts: all
+  tasks:
+    - git:
+        repo: "git@github.com:kaczynskid/ansible-test.git"
+        dest: "{{system_base_dir}}/ansible-test"

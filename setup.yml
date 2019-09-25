@@ -1,0 +1,12 @@
+---
+
+- hosts: all
+  gather_facts: False
+  tasks:
+    - name: install python
+      raw: "tce-load -w -i python"
+      when: tce_load_python | default(False)
+
+- hosts: all
+  roles:
+    - git-host

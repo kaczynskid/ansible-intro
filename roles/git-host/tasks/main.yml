@@ -1,0 +1,96 @@
+---
+
+- include: dependencies_apt.yml
+  when: ansible_pkg_mgr == "apt"
+
+- include: dependencies_yum.yml
+  when: ansible_pkg_mgr == "yum"
+
+- include: dependencies_unknown.yml
+  when: ansible_pkg_mgr == "unknown"
+
+- name: locate pip executable
+  command: which pip
+  changed_when: False
+  register: pip_path
+
+- name: update pip
+  pip:
+    name: pip
+    state: latest
+    executable: "{{ pip_path.stdout_lines[0] | trim }}"
+  become: yes
+  become_method: sudo
+
+- name: locate updated pip executable
+  command: which pip
+  changed_when: False
+  register: new_pip_path
+
+- name: install python libraries if missing
+  pip:
+    name: "{{ item }}"
+    state: latest
+    executable: "{{ new_pip_path.stdout_lines[0] | trim }}"
+  become: yes
+  become_method: sudo
+  with_items:
+    - httplib2
+    - docker-py
+    - kazoo
+    - botocore
+    - boto
+    - boto3
+
+- name: make sure local directory exists
+  local_action:
+    module: file
+    path: "{{ system_local_dir }}"
+    state: directory
+    mode: 0777
+
+- name: make sure base directory exist
+  file:
+    path: "{{ system_base_dir }}"
+    state: directory
+    mode: 0777
+    owner: "{{ system_user_name }}"
+    group: "{{ system_user_name }}"
+  become: yes
+  become_method: sudo
+
+- name: check if ssh key exists
+  stat:
+    path: "~/.ssh/id_rsa"
+  register: docker_host_ssh_status
+
+- name: install ssh key
+  template:
+    src: "id_rsa.j2"
+    dest: "~/.ssh/id_rsa"
+    mode: 0600
+  when: not docker_host_ssh_status.stat.exists
+
+- name: install ssh public key
+  template:
+    src: "id_rsa.pub.j2"
+    dest: "~/.ssh/id_rsa.pub"
+    mode: 0600
+  when: not docker_host_ssh_status.stat.exists
+
+- name: check if git config exists
+  stat:
+    path: "~/.gitconfig"
+  register: docker_host_git_status
+
+- name: install git config
+  template:
+    src: "gitconfig.j2"
+    dest: "~/.gitconfig"
+    mode: 0600
+  when: not docker_host_git_status.stat.exists
+
+- name: add github host key to known_hosts
+  shell: "ssh-keygen -R {{ item }}; ssh-keyscan -H {{ item }} >> ~/.ssh/known_hosts"
+  with_items:
+    - "github.com"

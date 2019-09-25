@@ -10,6 +10,11 @@
     pip install ansible
     ```
 
+ - configure Ansible
+    ```shell script
+    cat ansible.cfg
+    ```
+
  - ad-hoc commands
    ```shell script
    ansible 127.0.0.1 -a "pwd"
@@ -89,6 +94,11 @@
     # roles/git-host/templates
     # roles/git-host/vars
     ```
+    ```yaml
+    - hosts: all
+      roles:
+        - git-host
+    ```
 
  - install pip & git depending on target package manager 
     ```yaml
@@ -165,11 +175,21 @@
     ```shell script
     ssh-keygen -f .id_rsa -C auto@acme.com
     ```
+    ```yaml
+    system_ssh_key: "-----BEGIN RSA PRIVATE KEY-----..."
+    system_ssh_key_pub: "ssh-rsa AAAA..."
+    ```
+
+ - Ansible Vault password file
+    ```shell script
+    cat .vault_pass.txt 
+    siicret
+    ```
 
  - encrypt ssh keys
     ```shell script
-    ansible-vault encrypt roles/docker-host/defaults/main.yml --vault-password-file ./.vault_pass.txt
-    ansible-vault decrypt roles/docker-host/defaults/main.yml --vault-password-file ./.vault_pass.txt
+    ansible-vault encrypt roles/git-host/defaults/main.yml --vault-password-file ./.vault_pass.txt
+    ansible-vault decrypt roles/git-host/defaults/main.yml --vault-password-file ./.vault_pass.txt
     ```
 
  - install ssh keys
